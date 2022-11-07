@@ -9,7 +9,7 @@ namespace plan9 {
     class window::window_impl {
     public:
         explicit window_impl() {
-            app = gtk_application_new ("org.gtk.example", G_APPLICATION_FLAGS_NONE);
+            app = gtk_application_new ("com.shanks", G_APPLICATION_FLAGS_NONE);
             g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
         }
         void show() const {
