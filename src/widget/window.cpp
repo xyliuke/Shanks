@@ -4,13 +4,19 @@
 
 #include "window.h"
 #include <gtk/gtk.h>
+#include <fstream>
+#include "resource.h"
 
 namespace plan9 {
+    static void ok_button1_clicked() {
+        g_print("click");
+    }
     class window::window_impl {
     public:
         explicit window_impl() {
             app = gtk_application_new ("com.shanks", G_APPLICATION_FLAGS_NONE);
-            g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
+            g_signal_connect (app, "startup", G_CALLBACK (app_startup), NULL);
+            g_signal_connect (app, "activate", G_CALLBACK (activate), this);
         }
         void show() const {
             g_application_run (G_APPLICATION (app), 0, nullptr);
@@ -20,19 +26,42 @@ namespace plan9 {
         }
     private:
         static void activate (GtkApplication *app, gpointer user_data) {
-            GtkWidget *window;
-            GtkWidget *button;
+            /* Construct a GtkBuilder instance and load our UI description */
+            GtkBuilder *builder = resource::getWindowBuilder();
+            GObject *window = gtk_builder_get_object (builder, "window");
+            gtk_window_set_application (GTK_WINDOW (window), app);
 
-            window = gtk_application_window_new (app);
-            gtk_window_set_title (GTK_WINDOW (window), "Window");
-            gtk_window_set_default_size (GTK_WINDOW (window), 200, 200);
+            const GActionEntry win_entries[] = {
+                    { "new", new_activated, NULL, NULL, NULL },
+                    };
+            GSimpleActionGroup *group;
+            group = g_simple_action_group_new ();
+            g_action_map_add_action_entries (G_ACTION_MAP (group), win_entries, G_N_ELEMENTS (win_entries), nullptr);
+            g_object_unref(group);
 
-            button = gtk_button_new_with_label ("Hello World");
-//            g_signal_connect (button, "clicked", G_CALLBACK (print_hello), NULL);
-            gtk_window_set_child (GTK_WINDOW (window), button);
-
-            gtk_window_present (GTK_WINDOW (window));
+            gtk_application_window_set_show_menubar (GTK_APPLICATION_WINDOW (window), true);
+            gtk_widget_show (GTK_WIDGET (window));
+            g_object_unref (builder);
         }
+
+        static void app_startup (GApplication *app, gpointer user_data) {
+            GtkBuilder *builder = resource::getMenuBarBuilder();
+            GMenuModel *menubar = G_MENU_MODEL (gtk_builder_get_object (builder, "menubar"));
+            gtk_application_set_menubar (GTK_APPLICATION (app), menubar);
+            g_object_unref (builder);
+        }
+
+        void create_menu_bar() {
+            GtkBuilder *builder = gtk_builder_new_from_file("./widget.assets/menu/menu_bar.ui");
+            GMenuModel *menuModel;
+            menuModel = G_MENU_MODEL (gtk_builder_get_object (builder, "menu"));
+            gtk_application_set_menubar(app, menuModel);
+        }
+
+        static void new_activated (GSimpleAction *action, GVariant *parameter, gpointer win) {
+            g_print("hello");
+        }
+
     private:
         GtkApplication *app;
     };
