@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
-    <gresource prefix="/org/gtk">
+    <gresource prefix="/shanks/widget">
         <file preprocess="xml-stripblanks" alias="menu_bar">widget.assets/menu/menu_bar.ui</file>
         <file preprocess="xml-stripblanks" alias="window">widget.assets/widget/window.ui</file>
     </gresource>

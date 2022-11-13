@@ -5,8 +5,7 @@
             <section>
                 <item>
                     <attribute name="label">New</attribute>
-                    <attribute name="action">new</attribute>
-                    <attribute name="enable">true</attribute>
+                    <attribute name="action">window.new</attribute>
                 </item>
                 <item>
                     <attribute name="label">Open</attribute>

@@ -5,6 +5,7 @@
 #include "window.h"
 #include <gtk/gtk.h>
 #include <fstream>
+#include <memory>
 #include "resource.h"
 
 namespace plan9 {
@@ -15,7 +16,7 @@ namespace plan9 {
     public:
         explicit window_impl() {
             app = gtk_application_new ("com.shanks", G_APPLICATION_FLAGS_NONE);
-            g_signal_connect (app, "startup", G_CALLBACK (app_startup), NULL);
+            g_signal_connect (app, "startup", G_CALLBACK (app_startup), this);
             g_signal_connect (app, "activate", G_CALLBACK (activate), this);
         }
         void show() const {
@@ -39,23 +40,25 @@ namespace plan9 {
             g_action_map_add_action_entries (G_ACTION_MAP (group), win_entries, G_N_ELEMENTS (win_entries), nullptr);
             g_object_unref(group);
 
+            auto impl = reinterpret_cast<window_impl *>(user_data);
+            impl->create_menu_bar();
+
             gtk_application_window_set_show_menubar (GTK_APPLICATION_WINDOW (window), true);
             gtk_widget_show (GTK_WIDGET (window));
+            
             g_object_unref (builder);
         }
 
         static void app_startup (GApplication *app, gpointer user_data) {
+//            auto impl = reinterpret_cast<window_impl *>(user_data);
+//            impl->create_menu_bar();
+        }
+
+        void create_menu_bar() {
             GtkBuilder *builder = resource::getMenuBarBuilder();
             GMenuModel *menubar = G_MENU_MODEL (gtk_builder_get_object (builder, "menubar"));
             gtk_application_set_menubar (GTK_APPLICATION (app), menubar);
             g_object_unref (builder);
-        }
-
-        void create_menu_bar() {
-            GtkBuilder *builder = gtk_builder_new_from_file("./widget.assets/menu/menu_bar.ui");
-            GMenuModel *menuModel;
-            menuModel = G_MENU_MODEL (gtk_builder_get_object (builder, "menu"));
-            gtk_application_set_menubar(app, menuModel);
         }
 
         static void new_activated (GSimpleAction *action, GVariant *parameter, gpointer win) {
