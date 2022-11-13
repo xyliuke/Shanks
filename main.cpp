@@ -1,5 +1,6 @@
 #include <iostream>
 #include <widget/window.h>
+#include "widget/application.h"
 //#include <gtk/gtk.h>
 //
 //static void print_hello() {
@@ -32,6 +33,8 @@ int main (int argc, char **argv)
 //    g_object_unref (app);
 //
 //    return status;
-    plan9::window window = plan9::window();
-    window.show();
+//    plan9::window window = plan9::window();
+//    window.show();
+    plan9::application application = plan9::application();
+    application.show();
 }
