@@ -9,13 +9,13 @@
 
 namespace plan9
 {
-    class application {
+    class Application {
     public:
-        application();
-        void show();
+        Application();
+        int run();
     private:
         class application_impl;
-//        std::shared_ptr<application_impl> impl_;
+        std::shared_ptr<application_impl> impl_;
     };
 }
 

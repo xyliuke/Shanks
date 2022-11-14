@@ -35,6 +35,6 @@ int main (int argc, char **argv)
 //    return status;
 //    plan9::window window = plan9::window();
 //    window.show();
-    plan9::application application = plan9::application();
-    application.show();
+    plan9::Application application = plan9::Application();
+    application.run();
 }
