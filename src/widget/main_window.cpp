@@ -7,11 +7,12 @@
 
 namespace plan9
 {
-    class MainWindow::MainWindowImpl : public Gtk::Window {
+    class MainWindow::MainWindowImpl : public Gtk::ApplicationWindow {
     public:
         MainWindowImpl() {
             set_title("Shanks");
             set_default_size(800, 600);
+            set_show_menubar(true);
         }
     };
 

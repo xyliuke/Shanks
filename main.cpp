@@ -1,5 +1,4 @@
 #include <iostream>
-#include <widget/window.h>
 #include "widget/application.h"
 //#include <gtk/gtk.h>
 //
@@ -36,5 +35,5 @@ int main (int argc, char **argv)
 //    plan9::window window = plan9::window();
 //    window.show();
     plan9::Application application = plan9::Application();
-    application.run();
+    return application.run();
 }

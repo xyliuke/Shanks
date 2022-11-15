@@ -12,11 +12,11 @@
 
 namespace plan9
 {
-    GtkBuilder* resource::getMenuBarBuilder() {
-        return gtk_builder_new_from_resource("/shanks/widget/menu_bar");
+    Glib::RefPtr<Gtk::Builder> resource::getMenuBarBuilder() {
+        return Gtk::Builder::create_from_resource("/shanks/widget/menu_bar");
     }
 
-    GtkBuilder *resource::getWindowBuilder() {
-        return gtk_builder_new_from_resource("/shanks/widget/window");
+    Glib::RefPtr<Gtk::Builder> resource::getWindowBuilder() {
+        return Gtk::Builder::create_from_resource("/shanks/widget/window");
     }
 }

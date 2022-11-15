@@ -5,6 +5,8 @@
 #include "application.h"
 #include <gtkmm.h>
 #include "main_window.h"
+#include "resource.h"
+#include <iostream>
 
 namespace plan9
 {
@@ -17,6 +19,12 @@ namespace plan9
     protected:
         void on_startup() override {
             Application::on_startup();
+            add_action("new_menu",
+                       sigc::mem_fun(*this, &application_impl::on_menu_file_new_generic));
+
+            auto builder = resource::getMenuBarBuilder();
+            auto menu = builder->get_object<Gio::Menu>("menubar");
+            set_menubar(menu);
         }
 
         void on_activate() override {
@@ -28,6 +36,9 @@ namespace plan9
 
     private:
         std::shared_ptr<MainWindow> window;
+        void on_menu_file_new_generic() {
+            std::cout << "A File|New menu item was selected." << std::endl;
+        }
     };
 
     Application::Application() {
@@ -36,7 +47,5 @@ namespace plan9
 
     int Application::run() {
         return impl_->run();
-//        auto app = Gtk::Application::create("com.shanks");
-//        app->make_window_and_run<application::application_impl>(0, nullptr);
     }
 }

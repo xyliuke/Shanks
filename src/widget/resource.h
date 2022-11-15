@@ -4,14 +4,15 @@
 
 #ifndef SHANKS_RESOURCE_H
 #define SHANKS_RESOURCE_H
-#include <gtk/gtk.h>
+#include <gtkmm.h>
+#include <glibmm/refptr.h>
 
 namespace plan9
 {
     class resource {
     public:
-        static GtkBuilder* getMenuBarBuilder();
-        static GtkBuilder* getWindowBuilder();
+        static Glib::RefPtr<Gtk::Builder> getMenuBarBuilder();
+        static Glib::RefPtr<Gtk::Builder> getWindowBuilder();
     };
 }
 
