@@ -4,16 +4,26 @@
 
 #include "main_window.h"
 #include <gtkmm.h>
+#include "resource.h"
 
 namespace plan9
 {
-    class MainWindow::MainWindowImpl : public Gtk::ApplicationWindow {
+    class MainWindow::MainWindowImpl {
     public:
         MainWindowImpl() {
-            set_title("Shanks");
-            set_default_size(800, 600);
-            set_show_menubar(true);
+            auto builder = resource::getWindowBuilder();
+            window = Glib::make_refptr_for_instance(builder->get_widget<Gtk::Window>("window"));
         }
+
+        void show() {
+            window->show();
+        }
+
+        Gtk::Window * get_window() {
+            return window.get();
+        }
+    private:
+        Glib::RefPtr<Gtk::Window> window;
     };
 
     MainWindow::MainWindow() {
@@ -21,7 +31,7 @@ namespace plan9
     }
 
     Gtk::Window * MainWindow::get_window() {
-        return static_cast<Gtk::Window *>(impl_.get());
+        return impl_->get_window();
     }
 
     void MainWindow::show() {
