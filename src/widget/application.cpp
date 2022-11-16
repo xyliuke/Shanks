@@ -48,4 +48,8 @@ namespace plan9
     int Application::run() {
         return impl_->run();
     }
+
+    int Application::run(int argc, char **argv) {
+        return impl_->run(argc, argv);
+    }
 }

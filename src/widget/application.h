@@ -13,6 +13,7 @@ namespace plan9
     public:
         Application();
         int run();
+        int run(int argc, char **argv);
     private:
         class application_impl;
         std::shared_ptr<application_impl> impl_;
