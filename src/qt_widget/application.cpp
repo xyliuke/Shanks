@@ -5,25 +5,23 @@
 #include "application.h"
 #include <QApplication>
 #include <QWidget>
+#include "main_window.h"
 
 namespace plan9
 {
     class Application::ApplicationImpl {
     public:
-//        explicit ApplicationImpl() : app(std::make_shared<QApplication>(0, nullptr)) {
-
-//        }
-        explicit ApplicationImpl(int argc, char **argv) : app(std::make_shared<QApplication>(argc, argv)) {
-            QWidget *widget = new QWidget();
-            widget->setWindowTitle("Shanks");
-            widget->show();
+        explicit ApplicationImpl(int argc, char **argv) : app_(std::make_shared<QApplication>(argc, argv)) {
+            main_window_ = std::make_shared<MainWindow>();
+            main_window_->show();
         }
 
         int run() {
-            return app->exec();
+            return app_->exec();
         }
     private:
-        std::shared_ptr<QApplication> app;
+        std::shared_ptr<QApplication> app_;
+        std::shared_ptr<MainWindow> main_window_;
     };
 
     Application::Application() {
