@@ -8,9 +8,10 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(GTKMM REQUIRED gtkmm-4.0)
 link_directories(${GTKMM_LIBRARY_DIRS})
 
-add_subdirectory(src/widget)
+#add_subdirectory(src/widget)
+add_subdirectory(src/qt_widget)
 
 include_directories(./src/)
 
 add_executable(Shanks main.cpp)
-target_link_libraries(Shanks widget)
+target_link_libraries(Shanks qt_widget)

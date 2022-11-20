@@ -1,8 +1,8 @@
 #include <iostream>
-#include "widget/application.h"
+#include "qt_widget/application.h"
 
 int main (int argc, char **argv)
 {
-    plan9::Application application = plan9::Application();
-    return application.run(argc, argv);
+    plan9::Application application = plan9::Application(argc, argv);
+    return application.run();
 }
