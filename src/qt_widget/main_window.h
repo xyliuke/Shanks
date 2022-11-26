@@ -6,13 +6,15 @@
 #define SHANKS_MAIN_WINDOW_H
 
 #include <memory>
-
+class QWidget;
 namespace plan9
 {
     class MainWindow {
     public:
         explicit MainWindow();
         void show();
+        void set_index_view(QWidget *widget);
+        void update_content_view(QWidget *widget);
     private:
         class MainWindowImpl;
         std::shared_ptr<MainWindowImpl> impl_;

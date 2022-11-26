@@ -6,5 +6,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-add_library(qt_widget ${SRC})
+set(QRC_FILE resources/widget.qrc)
+
+add_library(qt_widget ${SRC} ${QRC_FILE})
 target_link_libraries(qt_widget Qt6::Widgets Qt6::Core Qt6::Gui)
