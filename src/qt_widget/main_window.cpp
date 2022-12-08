@@ -17,7 +17,7 @@ namespace plan9
             widget_->setWindowTitle("Shanks");
             widget_->resize(1280, 960);
             auto layout = new QHBoxLayout(widget_.get());
-
+            layout->setContentsMargins(1 ,1 ,1 ,1);
             splitter_ = std::make_shared<QSplitter>(Qt::Orientation::Horizontal, widget_.get());
             splitter_->setMouseTracking(true);
 
@@ -33,8 +33,6 @@ namespace plan9
 
             splitter_->addWidget(left_widget_.get());
             splitter_->addWidget(right_widget_.get());
-//            splitter_->setOpaqueResize(false);
-//            splitter_->setStyleSheet("QSplitter:handle{background-color:gray}");
             layout->addWidget(splitter_.get());
         }
         void show() {
