@@ -10,6 +10,8 @@
 #include <QFileDialog>
 #include <QLabel>
 #include "qwidget_util.h"
+#include "resource_manager.h"
+#include <QUiLoader>
 
 namespace plan9
 {
@@ -44,18 +46,22 @@ namespace plan9
     class YUVWidget::YUVWidgetImpl {
     public:
         explicit YUVWidgetImpl(QWidget *widget) : parent_(widget) {
-            layout_ = new QHBoxLayout(widget);
-            layout_->setContentsMargins(0, 0, 0, 0);
-            auto left = createLeftWidget();
-            left->setMaximumWidth(200);
-            left->setMinimumWidth(200);
-            layout_->addWidget(left);
+            QWidget *myWidget = ResourceManager::load_ui(":/ui/yuv_widget.ui");
+            QVBoxLayout *layout = new QVBoxLayout(widget);
+            layout->addWidget(myWidget);
 
-            auto content = createContentWidget();
-            layout_->addWidget(content, 6);
-
-            auto right = createRightWidget();
-            layout_->addWidget(right, 2);
+//            layout_ = new QHBoxLayout(widget);
+//            layout_->setContentsMargins(0, 0, 0, 0);
+//            auto left = createLeftWidget();
+//            left->setMaximumWidth(200);
+//            left->setMinimumWidth(200);
+//            layout_->addWidget(left);
+//
+//            auto content = createContentWidget();
+//            layout_->addWidget(content, 6);
+//
+//            auto right = createRightWidget();
+//            layout_->addWidget(right, 2);
         }
 
         ~YUVWidgetImpl() {
@@ -105,11 +111,6 @@ namespace plan9
 
     YUVWidget::YUVWidget() {
         impl_ = std::make_shared<YUVWidgetImpl>(this);
-//        this->setAutoFillBackground(true);
-//        this->setStyleSheet("{background-color:red}");
-        QPalette p(this->palette());
-        p.setColor( QPalette::Window, Qt::red );
-        this->setPalette( p );
     }
 
 
