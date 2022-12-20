@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 #add_subdirectory(src/widget)
 add_subdirectory(src/qt_widget)
+add_subdirectory(test/)
 
 include_directories(./src/)
 
