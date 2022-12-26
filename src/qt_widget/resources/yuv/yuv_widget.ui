@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>yuv_widget</class>
+ <widget class="QWidget" name="yuv_widget">
+  <layout class="QHBoxLayout">
+   <item column="1">
+    <widget class="YUVLeftWidget" name="left" native="true">
+
+    </widget>
+   </item>
+   <item column="3">
+    <widget class="QLabel" name="label1">
+     <property name="text">
+      <string>hello world1</string>
+     </property>
+    </widget>
+   </item>
+
+   <item column="1">
+    <widget class="QLabel" name="label2">
+     <property name="text">
+      <string>hello world2</string>
+     </property>
+    </widget>
+   </item>
+
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>YUVLeftWidget</class>
+   <extends>QWidget</extends>
+   <header location="global">../../yuv_left_widget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

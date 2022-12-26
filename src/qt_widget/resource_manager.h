@@ -14,7 +14,9 @@ namespace plan9
 {
     class ResourceManager {
     public:
-        static QWidget *load_ui(QString source);
+        static QWidget *load_ui(const QString &source);
+        static QWidget *load_ui(const QString &source, QWidget *parent);
+        static void print_resources();
     };
 }
 

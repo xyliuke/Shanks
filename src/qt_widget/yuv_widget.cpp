@@ -46,7 +46,7 @@ namespace plan9
     class YUVWidget::YUVWidgetImpl {
     public:
         explicit YUVWidgetImpl(QWidget *widget) : parent_(widget) {
-            QWidget *myWidget = ResourceManager::load_ui(":/ui/yuv_widget.ui");
+            QWidget *myWidget = ResourceManager::load_ui(":/ui/yuv/yuv_widget.ui");
             QVBoxLayout *layout = new QVBoxLayout(widget);
             layout->addWidget(myWidget);
 

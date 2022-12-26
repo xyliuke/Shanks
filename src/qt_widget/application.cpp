@@ -8,7 +8,6 @@
 #include "main_window.h"
 #include "main_window_manager.h"
 #include <QFile>
-#include <QDirIterator>
 
 class LoadQtQrc {
 public:
@@ -22,10 +21,6 @@ public:
     }
 private:
     void load_style(const std::shared_ptr<QApplication> app) {
-//        QDirIterator iterator(":", QDirIterator::Subdirectories);
-//        while (iterator.hasNext()) {
-//            qDebug() << iterator.next();
-//        }
         QFile file(":/style/style.qss");
         if (file.open(QFile::ReadOnly)) {
             QString string = QString(file.readAll());

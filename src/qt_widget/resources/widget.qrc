@@ -4,6 +4,7 @@
         <file>style.qss</file>
     </qresource>
     <qresource prefix="ui">
-        <file>yuv_widget.ui</file>
+        <file>yuv/yuv_widget.ui</file>
+        <file>yuv/yuv_left_widget.ui</file>
     </qresource>
 </RCC>

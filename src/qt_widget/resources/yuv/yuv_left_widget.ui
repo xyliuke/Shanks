@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <author/>
+    <comment/>
+    <exportmacro/>
+    <class>yuv_left</class>
+    <widget class="QWidget" name="yuv_left">
+        <layout class="QVBoxLayout">
+            <item>
+                <widget class="QPushButton" name="label2">
+                    <property name="text">
+                        <string>hello world</string>
+                    </property>
+                </widget>
+            </item>
+        </layout>
+    </widget>
+    <pixmapfunction/>
+    <connections/>
+</ui>

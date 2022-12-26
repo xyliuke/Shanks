@@ -57,7 +57,6 @@ namespace plan9
                 auto model = new QStringListModel(list);
                 list_view_->setModel(model);
                 QObject::connect(list_view_.get(), &QListView::pressed, [this](QModelIndex index){
-                    qDebug() << "pressed" << index.row();
                     this->update_content_view(index);
                 });
             }
