@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
-    <author/>
-    <comment/>
-    <exportmacro/>
-    <class>yuv_left</class>
-    <widget class="QWidget" name="yuv_left">
-        <layout class="QVBoxLayout">
-            <item>
-                <widget class="QPushButton" name="label2">
-                    <property name="text">
-                        <string>hello world</string>
-                    </property>
-                </widget>
-            </item>
-        </layout>
-    </widget>
-    <pixmapfunction/>
-    <connections/>
+ <class>yuv_left</class>
+ <widget class="QWidget" name="yuv_left">
+  <layout class="QVBoxLayout">
+   <item>
+    <layout class="QHBoxLayout">
+     <item>
+      <widget class="QPushButton" name="open_file_button">
+        <property name="text">
+            <string>打开文件</string>
+        </property>
+        <property name="maximumWidth">
+          <number>80</number>
+        </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="open_file_label">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+ </connections>
 </ui>

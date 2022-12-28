@@ -34,6 +34,7 @@ namespace plan9
             splitter_->addWidget(left_widget_.get());
             splitter_->addWidget(right_widget_.get());
             layout->addWidget(splitter_.get());
+            splitter_->setCollapsible(0, true);
         }
         void show() {
             widget_->show();

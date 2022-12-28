@@ -15,7 +15,8 @@ namespace plan9
 
         ~YUVLeftWidget();
     private:
-
+        class YUVLeftWidgetImpl;
+        std::shared_ptr<YUVLeftWidgetImpl> impl_;
     };
 }
 

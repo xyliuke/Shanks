@@ -47,7 +47,8 @@ namespace plan9
     public:
         explicit YUVWidgetImpl(QWidget *widget) : parent_(widget) {
             QWidget *myWidget = ResourceManager::load_ui(":/ui/yuv/yuv_widget.ui");
-            QVBoxLayout *layout = new QVBoxLayout(widget);
+            auto layout = new QVBoxLayout(widget);
+            layout->setContentsMargins(1, 1, 1, 1);
             layout->addWidget(myWidget);
 
 //            layout_ = new QHBoxLayout(widget);

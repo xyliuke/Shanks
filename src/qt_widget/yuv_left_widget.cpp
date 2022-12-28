@@ -7,16 +7,37 @@
 #include "yuv_left_widget.h"
 #include "resource_manager.h"
 #include <QHBoxLayout>
+#include <QPushButton>
+#include <QFileDialog>
+#include <QLabel>
 #include "qwidget_util.h"
 
 namespace plan9
 {
+    class YUVLeftWidget::YUVLeftWidgetImpl {
+    public:
+        explicit YUVLeftWidgetImpl(QWidget *widget) {
+            auto yuvWidget = plan9::ResourceManager::load_ui(":ui/yuv/yuv_left_widget.ui", widget);
+            auto layout = new QHBoxLayout(widget);
+            layout->addWidget(yuvWidget);
+            QWidgetUtil::set_background_color(widget, Qt::red);
+
+            auto button = yuvWidget->findChild<QPushButton *>("open_file_button");
+            auto label = yuvWidget->findChild<QLabel *>("open_file_label");
+            connect(button, &QPushButton::pressed, [widget, label, this](){
+                file_ = QFileDialog::getOpenFileName(widget, "选择YUV文件", "~", "*");
+                label->setText(file_);
+                label->setToolTip(file_);
+            });
+        }
+
+    private:
+        QString file_;
+    };
+
     YUVLeftWidget::YUVLeftWidget(QWidget *parent) :
             QWidget(parent) {
-        auto widget = plan9::ResourceManager::load_ui(":ui/yuv/yuv_left_widget.ui", this);
-        auto layout = new QHBoxLayout(this);
-        layout->addWidget(widget);
-        QWidgetUtil::set_background_color(this, Qt::red);
+        impl_ = std::make_shared<YUVLeftWidgetImpl>(this);
     }
 
     YUVLeftWidget::~YUVLeftWidget() {
