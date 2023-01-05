@@ -4,6 +4,8 @@
 
 #include "qwidget_util.h"
 #include <QWidget>
+#include <QApplication>
+#include <QScreen>
 
 namespace plan9
 {
@@ -12,5 +14,10 @@ namespace plan9
         p.setColor(QPalette::Window, color);
         widget->setAutoFillBackground(true);
         widget->setPalette(p);
+    }
+
+    QRect QWidgetUtil::get_screen_available_rect() {
+        QScreen* screen =QApplication::primaryScreen();
+        return screen->availableGeometry();;
     }
 }

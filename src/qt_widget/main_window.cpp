@@ -7,6 +7,7 @@
 #include <QSplitter>
 #include <QHBoxLayout>
 #include <QLabel>
+#include "qwidget_util.h"
 
 namespace plan9
 {
@@ -15,7 +16,8 @@ namespace plan9
     public:
         explicit MainWindowImpl() : widget_(std::make_shared<QWidget>()) {
             widget_->setWindowTitle("Shanks");
-            widget_->resize(1280, 960);
+            QRect rect = QWidgetUtil::get_screen_available_rect();
+            widget_->resize(rect.width(), rect.height());
             auto layout = new QHBoxLayout(widget_.get());
             layout->setContentsMargins(1 ,1 ,1 ,1);
             splitter_ = std::make_shared<QSplitter>(Qt::Orientation::Horizontal, widget_.get());

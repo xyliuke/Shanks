@@ -8,13 +8,19 @@
 #include <QFile>
 #include <QDirIterator>
 #include "yuv_left_widget.h"
+#include "render_widget.h"
 
 namespace plan9
 {
     class UILoader : public QUiLoader {
         QWidget * createWidget(const QString &className, QWidget *parent = nullptr, const QString &name = QString()) override {
+            QWidget *widget = nullptr;
             if (className == "YUVLeftWidget") {
-                QWidget *widget = new YUVLeftWidget(parent);
+                widget = new YUVLeftWidget(parent);
+            } else if (className == "RenderWidget") {
+                widget = new RenderWidget(parent);
+            }
+            if (widget != nullptr) {
                 widget->setObjectName(name);
                 return widget;
             }
