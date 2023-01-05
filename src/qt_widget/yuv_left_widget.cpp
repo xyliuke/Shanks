@@ -24,6 +24,8 @@ namespace plan9
 
             auto button = yuvWidget->findChild<QPushButton *>("open_file_button");
             auto label = yuvWidget->findChild<QLabel *>("open_file_label");
+            label->setText("请选择文件路径");
+            label->setToolTip("请选择文件路径");
             connect(button, &QPushButton::pressed, [widget, label, this](){
                 file_ = QFileDialog::getOpenFileName(widget, "选择YUV文件", "~", "*");
                 label->setText(file_);
