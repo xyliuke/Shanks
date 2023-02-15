@@ -5,11 +5,20 @@
 #ifndef SHANKS_RENDER_WIDGET_H
 #define SHANKS_RENDER_WIDGET_H
 #include <QOpenGLWidget>
+#include <QOpenGLFunctions>
+
 namespace plan9
 {
     class RenderWidget : public QOpenGLWidget {
     public:
-        RenderWidget(QWidget *parent);
+        explicit RenderWidget(QWidget *parent);
+    protected:
+        void initializeGL() override;
+        void paintGL() override;
+        void resizeGL(int w, int h) override;
+    private:
+        class RenderWidgetImpl;
+        std::shared_ptr<RenderWidgetImpl> impl_;
     };
 
 }

@@ -9,15 +9,14 @@ class QWidget;
 class QColor;
 class QRect;
 
-namespace plan9
-{
+namespace plan9 {
     class QWidgetUtil {
     public:
         static void set_background_color(QWidget *widget, QColor color);
+
         static QRect get_screen_available_rect();
     };
 }
-
 
 
 #endif //SHANKS_QWIDGETUTIL_H

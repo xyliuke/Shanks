@@ -7,4 +7,11 @@
         <file>yuv/yuv_widget.ui</file>
         <file>yuv/yuv_left_widget.ui</file>
     </qresource>
+    <qresource prefix="shader">
+        <file>shader/vertex_shader.glsl</file>
+        <file>shader/fragment_shader.glsl</file>
+    </qresource>
+    <qresource prefix="image">
+        <file>images/test.jpeg</file>
+    </qresource>
 </RCC>

@@ -7,17 +7,16 @@
 #include <QApplication>
 #include <QScreen>
 
-namespace plan9
-{
+namespace plan9 {
     void QWidgetUtil::set_background_color(QWidget *widget, QColor color) {
-        auto p= widget->palette();
+        auto p = widget->palette();
         p.setColor(QPalette::Window, color);
         widget->setAutoFillBackground(true);
         widget->setPalette(p);
     }
 
     QRect QWidgetUtil::get_screen_available_rect() {
-        QScreen* screen =QApplication::primaryScreen();
+        auto screen = QApplication::primaryScreen();
         return screen->availableGeometry();;
     }
 }
