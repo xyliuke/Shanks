@@ -8,6 +8,7 @@
 #include "main_window.h"
 #include "main_window_manager.h"
 #include <QFile>
+#include <QSurfaceFormat>
 
 class LoadQtQrc {
 public:
@@ -35,6 +36,13 @@ namespace plan9
     class Application::ApplicationImpl {
     public:
         explicit ApplicationImpl(int argc, char **argv) : app_(std::make_shared<QApplication>(argc, argv)) {
+            QSurfaceFormat format;
+            format.setRenderableType(QSurfaceFormat::OpenGL);
+            format.setProfile(QSurfaceFormat::CoreProfile);
+//    format.setProfile(QSurfaceFormat::CompatibilityProfile);
+            format.setVersion(3,3);
+            QSurfaceFormat::setDefaultFormat(format);
+
             main_window_ = std::make_shared<MainWindow>();
             load_qrc_ = std::make_shared<LoadQtQrc>(app_);
             main_window_manager_ = std::make_shared<MainWindowManager>(main_window_);

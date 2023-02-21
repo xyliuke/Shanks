@@ -7,6 +7,7 @@
 #include <QOpenGLBuffer>
 #include <QOpenGLVertexArrayObject>
 #include "render_widget.h"
+#include <QFile>
 
 namespace plan9
 {
@@ -17,86 +18,131 @@ namespace plan9
         }
 
         ~RenderWidgetImpl() {
-            delete vao;
-            delete vbo;
-            delete ebo;
-            delete program_;
         }
 
         void initializeGL() {
-            initializeOpenGLFunctions();
-            glClearColor(0.0, 0.0, 0.0,1.0);
-            glEnable(GL_TEXTURE_2D);
-            glEnable(GL_DEPTH_TEST);
-
-            auto vertShader = new QOpenGLShader(QOpenGLShader::Vertex, this->openGlWidget_);
-            if (!(vertShader->compileSourceFile(":shader/shader/vertex_shader.glsl"))) {
-                qDebug() << "vertex shader error";
-            }
-            fragmentShader = new QOpenGLShader(QOpenGLShader::Fragment, this->openGlWidget_);
-            if (!(fragmentShader->compileSourceFile(":shader/shader/fragment_shader.glsl"))) {
-                qDebug() << "fragment shader error";
-            }
-
-            program_ = new QOpenGLShaderProgram;
-            program_->addShader(vertShader);
-            program_->addShader(fragmentShader);
-            program_->link();
-            program_->bind();
-
-            float vertices[] = {
-                0.5f, 0.5f, 0.0f, 1.0f, 1.f,  // 右上角
-                0.5f, -0.5f, 0.0f, 1.f, 0.f,  // 右下角
-                -0.5f, -0.5f, 0.0f, 0.f, 0.f,// 左下角
-                -0.5f, 0.5f, 0.0f, 0.f, 1.f,   // 左上角
-            };
-
-            unsigned int indices[] = {
-                    0, 1, 3, // first triangle
-                    1, 2, 3  // second triangle
-            };
-
-            vao = new QOpenGLVertexArrayObject();
-            vao->create();
-            vao->bind();
-
-            vbo = new QOpenGLBuffer();
-            vbo->create();
-            vbo->bind();
-            vbo->allocate(vertices, sizeof(vertices));
-
-            ebo = new QOpenGLBuffer(QOpenGLBuffer::IndexBuffer);
-            ebo->create();
-
-            program_->setAttributeBuffer("aPos", GL_FLOAT, 0, 3, 5 * sizeof(GLfloat));
-            program_->enableAttributeArray("aPos");
-
-            ebo->bind();
-            ebo->setUsagePattern(QOpenGLBuffer::StaticDraw);
-            ebo->allocate(indices, sizeof(indices));
-
-//            initTexture();
-            //向顶点着色器传递其中定义为"aColor"的变量所需的数据
-//            m_color=program->attributeLocation("aColor");
-//            program->setAttributeBuffer(m_color,GL_FLOAT,3*sizeof(GLfloat),3,6*sizeof(GLfloat));
-//            program->enableAttributeArray(m_color);
-
-            program_->release();//解绑程序
+            initOpenGL();
         }
         void paintGL() {
-            program_->bind();//绑定绘制所要使用的openGL程序
-            vao->bind();//绑定包含openGL程序所需信息的VAO
-            ebo->bind();
-            glDrawArrays(GL_TRIANGLES, 0, 6);//绘制
-            vao->release();//解绑VAO
-            ebo->release();
-            program_->release();//解绑程序
+            paintOpenGL();
         }
         void resizeGL(int w, int h) {
 
         }
 
     private:
+        void initOpenGL() {
+            initializeOpenGLFunctions();
+
+            vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+            QFile vertFile(":shader/shader/vertex_shader.glsl");
+            if (vertFile.open(QFile::ReadOnly)) {
+                qint64 size = vertFile.size();
+                auto buf = new char[size + 1]();
+                vertFile.read(buf, size + 1);
+                buf[size] = '\0';
+                glShaderSource(vertex_shader, 1, (const char **)&buf, NULL);
+                delete []buf;
+                glCompileShader(vertex_shader);
+                int success;
+                char infoLog[512];
+                glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
+                if (!success) {
+                    glGetShaderInfoLog(vertex_shader, 512, NULL, infoLog);
+                }
+            }
+            frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
+            QFile fragFile(":shader/shader/fragment_shader.glsl");
+            if (fragFile.open(QFile::ReadOnly)) {
+                qint64 size = fragFile.size();
+                auto buf = new char[size + 1]();
+                fragFile.read(buf, size + 1);
+                buf[size] = '\0';
+                glShaderSource(frag_shader, 1, (const char **)&buf, NULL);
+                delete []buf;
+                glCompileShader(frag_shader);
+                int success;
+                char infoLog[512];
+                glGetShaderiv(frag_shader, GL_COMPILE_STATUS, &success);
+                if (!success)
+                {
+                    glGetShaderInfoLog(frag_shader, 512, NULL, infoLog);
+                }
+            }
+
+            shader_program = glCreateProgram();
+            glAttachShader(shader_program, vertex_shader);
+            glAttachShader(shader_program, frag_shader);
+            glLinkProgram(shader_program);
+            // check for linking errors
+            int success;
+            glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
+            if (!success) {
+                char infoLog[512];
+                glGetProgramInfoLog(shader_program, 512, nullptr, infoLog);
+            }
+            glDeleteShader(vertex_shader);
+            glDeleteShader(frag_shader);
+
+            float vertices[] = {
+                // positions          // colors           // texture coords
+                0.5f,  0.5f, 0.0f,  1.0f, 1.0f, // top right
+                0.5f, -0.5f, 0.0f,  1.0f, 0.0f, // bottom right
+                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
+                -0.5f,  0.5f, 0.0f,  0.0f, 1.0f  // top left
+            };
+            unsigned int indices[] = {
+                0, 1, 3, // first triangle
+                1, 2, 3  // second triangle
+            };
+            GLuint VBO, EBO;
+            glGenVertexArrays(1, &vao);
+            glGenBuffers(1, &VBO);
+            glGenBuffers(1, &EBO);
+
+            glBindVertexArray(vao);
+
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+            // position attribute
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+            // color attribute
+//            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+//            glEnableVertexAttribArray(1);
+            // texture coord attribute
+
+            glGenTextures(1, &texture);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            QImage image(":image/images/test.jpeg");
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), (GLsizei)image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
+            glGenerateMipmap(GL_TEXTURE_2D);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+            glEnableVertexAttribArray(1);
+            glUniform1i(glGetUniformLocation(frag_shader, "ourTexture"), 0);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
+        }
+
+        void paintOpenGL() {
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, texture);
+            glUseProgram(shader_program);
+            glBindVertexArray(vao);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        }
+
 //        void initTexture() {
 //            QOpenGLTexture texture(QOpenGLTexture::Target2D);
 //            texture.create();
@@ -119,11 +165,17 @@ namespace plan9
 //        }
     private:
         QOpenGLWidget *openGlWidget_;
-        QOpenGLShaderProgram *program_;
-        QOpenGLShader *fragmentShader;
-        QOpenGLVertexArrayObject *vao;
-        QOpenGLBuffer *vbo;
-        QOpenGLBuffer *ebo;
+//        QOpenGLShaderProgram *program_;
+//        QOpenGLShader *fragmentShader;
+//        QOpenGLVertexArrayObject *vao;
+//        QOpenGLBuffer *vbo;
+//        QOpenGLBuffer *ebo;
+
+        GLuint shader_program;
+        GLuint vertex_shader;
+        GLuint frag_shader;
+        GLuint vao;
+        GLuint texture;
     };
 
     RenderWidget::RenderWidget(QWidget *parent) : QOpenGLWidget(parent){

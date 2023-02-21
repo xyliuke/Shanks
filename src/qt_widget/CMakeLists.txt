@@ -9,4 +9,4 @@ set(CMAKE_AUTORCC ON)
 set(QRC_FILE resources/widget.qrc)
 
 add_library(qt_widget ${SRC} ${QRC_FILE})
-target_link_libraries(qt_widget Qt6::Widgets Qt6::Core Qt6::Gui Qt6::UiTools Qt6::Designer)
+target_link_libraries(qt_widget Qt6::Widgets Qt6::Core Qt6::Gui Qt6::UiTools Qt6::Designer file_util)
