@@ -18,7 +18,7 @@ namespace plan9
     class RenderWidget::RenderWidgetImpl : protected QOpenGLFunctions {
     public:
         explicit RenderWidgetImpl() : vertices(new float[20]()) {
-            initVertices(mode_, 0, 0, true);
+            initVertices(mode_);
         }
 
         ~RenderWidgetImpl() {
@@ -36,23 +36,39 @@ namespace plan9
             paintOpenGL();
         }
         void resizeGL(int w, int h) {
+            if (window_width_ != w || window_height_ != h) {
+                isRefreshVertices = true;
+            }
             window_width_ = w;
             window_height_ = h;
-            updateVerticesIfNeed(true);
+            if (isRefreshVertices) {
+                updateVerticesIfNeed();
+                isRefreshVertices = false;
+            }
         }
 
         void updateImage(std::shared_ptr<QImage> image) {
-            image_width_ = image->width();
-            image_height_ = image->height();
             if (isInitOpenGL_) {
-                updateVerticesIfNeed(false);
+                if (image_width_ != image->width() || image_height_ != image->height()) {
+                    isRefreshVertices = true;
+                }
+                image_width_ = image->width();
+                image_height_ = image->height();
+                if (isRefreshVertices) {
+                    updateVerticesIfNeed();
+                    isRefreshVertices = false;
+                }
                 QImage horFlipImage = image->mirrored(false, true);
                 glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->width(), (GLsizei)image->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, horFlipImage.bits());
                 glGenerateMipmap(GL_TEXTURE_2D);
+            } else {
+                this->image_ = image;
             }
-            this->image_ = image;
         }
         void setFillMode(RenderFillMode mode) {
+            if (this->mode_ != mode) {
+                isRefreshVertices = true;
+            }
             this->mode_ = mode;
         }
 
@@ -110,127 +126,62 @@ namespace plan9
             glDeleteShader(frag_shader);
         }
 
-        void initDefaultFillVertices() {
+        void initDefaultFillVertices(float x, float y) {
             // top right
-            vertices[0] = 1.f;
-            vertices[1] = 1.f;
+            vertices[0] = x;
+            vertices[1] = y;
             vertices[2] = 0.f;
             // top right texture
             vertices[3] = 1.f;
             vertices[4] = 1.f;
 
             // bottom right
-            vertices[5] = 1.f;
-            vertices[6] = -1.f;
+            vertices[5] = x;
+            vertices[6] = -y;
             vertices[7] = 0.f;
             // bottom right texture
             vertices[8] = 1.f;
             vertices[9] = 0.f;
 
             // bottom left
-            vertices[10] = -1.f;
-            vertices[11] = -1.f;
+            vertices[10] = -x;
+            vertices[11] = -y;
             vertices[12] = 0.f;
             // bottom left texture
             vertices[13] = 0.f;
             vertices[14] = 0.f;
 
-            // bottom left
-            vertices[15] = -1.f;
-            vertices[16] = 1.f;
+            // top left
+            vertices[15] = -x;
+            vertices[16] = y;
             vertices[17] = 0.f;
-            // bottom left texture
+            // top left texture
             vertices[18] = 0.f;
             vertices[19] = 1.f;
         }
-        void initVertices(RenderFillMode mode, int new_image_width, int new_image_height, bool refresh) {
-//            if (new_image_width == this->image_width_ && new_image_height == this->image_height_ && mode == this->mode_) {
-                //已经设置过
-//                return;
-//            }
+
+        void initVertices(RenderFillMode mode) {
             if (mode == Fill) {
-                initDefaultFillVertices();
+                initDefaultFillVertices(1.f, 1.f);
             } else if (mode == Fit){
                 if (window_width_ == 0 || window_height_ == 0 || image_height_ == 0 || image_width_ == 0) {
-                    initDefaultFillVertices();
+                    initDefaultFillVertices(1.f, 1.f);
                     return;
                 }
                 float y =  (image_height_ * 1.f / image_width_) / (window_height_ * 1.f / window_width_);
-                // top right
-                vertices[0] = 1.f;
-                vertices[1] = y;
-                vertices[2] = 0.f;
-                // top right texture
-                vertices[3] = 1.f;
-                vertices[4] = 1.f;
-
-                // bottom right
-                vertices[5] = 1.f;
-                vertices[6] = -y;
-                vertices[7] = 0.f;
-                // bottom right texture
-                vertices[8] = 1.f;
-                vertices[9] = 0.f;
-
-                // bottom left
-                vertices[10] = -1.f;
-                vertices[11] = -y;
-                vertices[12] = 0.f;
-                // bottom left texture
-                vertices[13] = 0.f;
-                vertices[14] = 0.f;
-
-                // top left
-                vertices[15] = -1.f;
-                vertices[16] = y;
-                vertices[17] = 0.f;
-                // bottom left texture
-                vertices[18] = 0.f;
-                vertices[19] = 1.f;
+                initDefaultFillVertices(1.f, y);
+            } else if (mode == AspectFill) {
+                if (window_width_ == 0 || window_height_ == 0 || image_height_ == 0 || image_width_ == 0) {
+                    initDefaultFillVertices(1.f, 1.f);
+                    return;
+                }
+                float x =  (image_width_ * 1.f / image_height_) / (window_width_ * 1.f / window_height_);
+                initDefaultFillVertices(x, 1.f);
             }
-//            // top right
-//            vertices[0] = 1.f;
-//            vertices[1] = 1.f;
-//            vertices[2] = 0.f;
-//            // top right texture
-//            vertices[3] = 1.f;
-//            vertices[4] = 1.f;
-//
-//            // bottom right
-//            vertices[5] = 1.f;
-//            vertices[6] = -1.f;
-//            vertices[7] = 0.f;
-//            // bottom right texture
-//            vertices[8] = 1.f;
-//            vertices[9] = 0.f;
-//
-//            // bottom left
-//            vertices[10] = -1.f;
-//            vertices[11] = -1.f;
-//            vertices[12] = 0.f;
-//            // bottom left texture
-//            vertices[13] = 0.f;
-//            vertices[14] = 0.f;
-//
-//            // bottom left
-//            vertices[15] = -1.f;
-//            vertices[16] = 1.f;
-//            vertices[17] = 0.f;
-//            // bottom left texture
-//            vertices[18] = 0.f;
-//            vertices[19] = 1.f;
-
-//            vertices = {
-//                // positions        // texture coords
-//                0.5f,  0.5f, 0.0f,  1.0f, 1.0f, // top right
-//                0.5f, -0.5f, 0.0f,  1.0f, 0.0f, // bottom right
-//                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
-//                -0.5f,  0.5f, 0.0f,  0.0f, 1.0f  // top left
-//            };
         }
 
-        void updateVerticesIfNeed(bool force) {
-            initVertices(mode_, image_width_, image_height_, force);
+        void updateVerticesIfNeed() {
+            initVertices(mode_);
             glBindVertexArray(vao);
 
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -274,7 +225,7 @@ namespace plan9
         }
 
         void paintOpenGL() {
-            glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture);
@@ -299,6 +250,7 @@ namespace plan9
         int window_width_{0};
         int window_height_{0};
         std::shared_ptr<QImage> image_;
+        bool isRefreshVertices{false};
     };
 
     RenderWidget::RenderWidget(QWidget *parent) : QOpenGLWidget(parent){
