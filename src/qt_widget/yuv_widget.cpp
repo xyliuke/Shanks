@@ -11,6 +11,7 @@
 #include <QLabel>
 #include "qwidget_util.h"
 #include "resource_manager.h"
+#include "render_widget.h"
 #include <QUiLoader>
 
 namespace plan9
@@ -51,18 +52,9 @@ namespace plan9
             layout->setContentsMargins(1, 1, 1, 1);
             layout->addWidget(myWidget);
 
-//            layout_ = new QHBoxLayout(widget);
-//            layout_->setContentsMargins(0, 0, 0, 0);
-//            auto left = createLeftWidget();
-//            left->setMaximumWidth(200);
-//            left->setMinimumWidth(200);
-//            layout_->addWidget(left);
-//
-//            auto content = createContentWidget();
-//            layout_->addWidget(content, 6);
-//
-//            auto right = createRightWidget();
-//            layout_->addWidget(right, 2);
+            auto renderWidget = myWidget->findChild<RenderWidget *>("center");
+            auto image = std::make_shared<QImage>(":image/images/test.jpeg");
+            renderWidget->updateImage(image);
         }
 
         ~YUVWidgetImpl() {

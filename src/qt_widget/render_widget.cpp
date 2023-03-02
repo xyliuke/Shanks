@@ -11,29 +11,54 @@
 
 namespace plan9
 {
+    static unsigned int indices[] = {
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
     class RenderWidget::RenderWidgetImpl : protected QOpenGLFunctions {
     public:
-        explicit RenderWidgetImpl(QOpenGLWidget *openGlWidget) {
-            this->openGlWidget_ = openGlWidget;
+        explicit RenderWidgetImpl() : vertices(new float[20]()) {
+            initVertices(mode_, 0, 0, true);
         }
 
         ~RenderWidgetImpl() {
+            delete[] vertices;
         }
 
         void initializeGL() {
+            initializeOpenGLFunctions();
+            initShader();
             initOpenGL();
+            isInitOpenGL_ = true;
+            updateImage(image_);
         }
         void paintGL() {
             paintOpenGL();
         }
         void resizeGL(int w, int h) {
+            window_width_ = w;
+            window_height_ = h;
+            updateVerticesIfNeed(true);
+        }
 
+        void updateImage(std::shared_ptr<QImage> image) {
+            image_width_ = image->width();
+            image_height_ = image->height();
+            if (isInitOpenGL_) {
+                updateVerticesIfNeed(false);
+                QImage horFlipImage = image->mirrored(false, true);
+                glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image->width(), (GLsizei)image->height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, horFlipImage.bits());
+                glGenerateMipmap(GL_TEXTURE_2D);
+            }
+            this->image_ = image;
+        }
+        void setFillMode(RenderFillMode mode) {
+            this->mode_ = mode;
         }
 
     private:
-        void initOpenGL() {
-            initializeOpenGLFunctions();
 
+        void initShader() {
             vertex_shader = glCreateShader(GL_VERTEX_SHADER);
             QFile vertFile(":shader/shader/vertex_shader.glsl");
             if (vertFile.open(QFile::ReadOnly)) {
@@ -83,58 +108,173 @@ namespace plan9
             }
             glDeleteShader(vertex_shader);
             glDeleteShader(frag_shader);
+        }
 
-            float vertices[] = {
-                // positions          // colors           // texture coords
-                0.5f,  0.5f, 0.0f,  1.0f, 1.0f, // top right
-                0.5f, -0.5f, 0.0f,  1.0f, 0.0f, // bottom right
-                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
-                -0.5f,  0.5f, 0.0f,  0.0f, 1.0f  // top left
-            };
-            unsigned int indices[] = {
-                0, 1, 3, // first triangle
-                1, 2, 3  // second triangle
-            };
-            GLuint VBO, EBO;
-            glGenVertexArrays(1, &vao);
-            glGenBuffers(1, &VBO);
-            glGenBuffers(1, &EBO);
+        void initDefaultFillVertices() {
+            // top right
+            vertices[0] = 1.f;
+            vertices[1] = 1.f;
+            vertices[2] = 0.f;
+            // top right texture
+            vertices[3] = 1.f;
+            vertices[4] = 1.f;
 
+            // bottom right
+            vertices[5] = 1.f;
+            vertices[6] = -1.f;
+            vertices[7] = 0.f;
+            // bottom right texture
+            vertices[8] = 1.f;
+            vertices[9] = 0.f;
+
+            // bottom left
+            vertices[10] = -1.f;
+            vertices[11] = -1.f;
+            vertices[12] = 0.f;
+            // bottom left texture
+            vertices[13] = 0.f;
+            vertices[14] = 0.f;
+
+            // bottom left
+            vertices[15] = -1.f;
+            vertices[16] = 1.f;
+            vertices[17] = 0.f;
+            // bottom left texture
+            vertices[18] = 0.f;
+            vertices[19] = 1.f;
+        }
+        void initVertices(RenderFillMode mode, int new_image_width, int new_image_height, bool refresh) {
+//            if (new_image_width == this->image_width_ && new_image_height == this->image_height_ && mode == this->mode_) {
+                //已经设置过
+//                return;
+//            }
+            if (mode == Fill) {
+                initDefaultFillVertices();
+            } else if (mode == Fit){
+                if (window_width_ == 0 || window_height_ == 0 || image_height_ == 0 || image_width_ == 0) {
+                    initDefaultFillVertices();
+                    return;
+                }
+                float y =  (image_height_ * 1.f / image_width_) / (window_height_ * 1.f / window_width_);
+                // top right
+                vertices[0] = 1.f;
+                vertices[1] = y;
+                vertices[2] = 0.f;
+                // top right texture
+                vertices[3] = 1.f;
+                vertices[4] = 1.f;
+
+                // bottom right
+                vertices[5] = 1.f;
+                vertices[6] = -y;
+                vertices[7] = 0.f;
+                // bottom right texture
+                vertices[8] = 1.f;
+                vertices[9] = 0.f;
+
+                // bottom left
+                vertices[10] = -1.f;
+                vertices[11] = -y;
+                vertices[12] = 0.f;
+                // bottom left texture
+                vertices[13] = 0.f;
+                vertices[14] = 0.f;
+
+                // top left
+                vertices[15] = -1.f;
+                vertices[16] = y;
+                vertices[17] = 0.f;
+                // bottom left texture
+                vertices[18] = 0.f;
+                vertices[19] = 1.f;
+            }
+//            // top right
+//            vertices[0] = 1.f;
+//            vertices[1] = 1.f;
+//            vertices[2] = 0.f;
+//            // top right texture
+//            vertices[3] = 1.f;
+//            vertices[4] = 1.f;
+//
+//            // bottom right
+//            vertices[5] = 1.f;
+//            vertices[6] = -1.f;
+//            vertices[7] = 0.f;
+//            // bottom right texture
+//            vertices[8] = 1.f;
+//            vertices[9] = 0.f;
+//
+//            // bottom left
+//            vertices[10] = -1.f;
+//            vertices[11] = -1.f;
+//            vertices[12] = 0.f;
+//            // bottom left texture
+//            vertices[13] = 0.f;
+//            vertices[14] = 0.f;
+//
+//            // bottom left
+//            vertices[15] = -1.f;
+//            vertices[16] = 1.f;
+//            vertices[17] = 0.f;
+//            // bottom left texture
+//            vertices[18] = 0.f;
+//            vertices[19] = 1.f;
+
+//            vertices = {
+//                // positions        // texture coords
+//                0.5f,  0.5f, 0.0f,  1.0f, 1.0f, // top right
+//                0.5f, -0.5f, 0.0f,  1.0f, 0.0f, // bottom right
+//                -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
+//                -0.5f,  0.5f, 0.0f,  0.0f, 1.0f  // top left
+//            };
+        }
+
+        void updateVerticesIfNeed(bool force) {
+            initVertices(mode_, image_width_, image_height_, force);
             glBindVertexArray(vao);
 
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) * 20, vertices, GL_STATIC_DRAW);
 
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
             // position attribute
             glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
             glEnableVertexAttribArray(0);
-            // color attribute
-//            glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
-//            glEnableVertexAttribArray(1);
-            // texture coord attribute
+        }
 
+        void initOpenGL() {
+            glGenVertexArrays(1, &vao);
+            glGenBuffers(1, &vbo);
+            glGenBuffers(1, &ebo);
+
+            glBindVertexArray(vao);
+
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices) * 20, vertices, GL_STATIC_DRAW);
+
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+            // position attribute
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(0);
+
+            // texture coord attribute
             glGenTextures(1, &texture);
             glBindTexture(GL_TEXTURE_2D, texture);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            QImage image(":image/images/test.jpeg");
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.width(), (GLsizei)image.height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, image.bits());
-            glGenerateMipmap(GL_TEXTURE_2D);
             glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
             glEnableVertexAttribArray(1);
             glUniform1i(glGetUniformLocation(frag_shader, "ourTexture"), 0);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            glBindVertexArray(0);
         }
 
         void paintOpenGL() {
-            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+            glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture);
@@ -143,43 +283,26 @@ namespace plan9
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         }
 
-//        void initTexture() {
-//            QOpenGLTexture texture(QOpenGLTexture::Target2D);
-//            texture.create();
-//            texture.setSize(100, 100);
-//            texture.allocateStorage();
-//            QImage image(":image/images/test.jpeg");
-//            texture.setData(image);
-//            texture.bind(0);
-//            program_->setUniformValue("ourTexture", 0);
-//
-//
-//
-//            unsigned int indices[] = {
-//                    // 注意索引从0开始!
-//                    // 此例的索引(0,1,2,3)就是顶点数组vertices的下标，
-//                    // 这样可以由下标代表顶点组合成矩形
-//                    0, 1, 3, // 第一个三角形
-//                    1, 2, 3  // 第二个三角形
-//            };
-//        }
     private:
-        QOpenGLWidget *openGlWidget_;
-//        QOpenGLShaderProgram *program_;
-//        QOpenGLShader *fragmentShader;
-//        QOpenGLVertexArrayObject *vao;
-//        QOpenGLBuffer *vbo;
-//        QOpenGLBuffer *ebo;
-
-        GLuint shader_program;
+        bool isInitOpenGL_{false};
+        GLuint shader_program{0};
         GLuint vertex_shader;
         GLuint frag_shader;
-        GLuint vao;
+        GLuint vao{0};
+        GLuint vbo{0};
+        GLuint ebo{0};
         GLuint texture;
+        float *vertices;
+        RenderFillMode mode_{Fit};
+        int image_width_{0};
+        int image_height_{0};
+        int window_width_{0};
+        int window_height_{0};
+        std::shared_ptr<QImage> image_;
     };
 
     RenderWidget::RenderWidget(QWidget *parent) : QOpenGLWidget(parent){
-        impl_ = std::make_shared<RenderWidgetImpl>(this);
+        impl_ = std::make_shared<RenderWidgetImpl>();
     }
 
     void RenderWidget::initializeGL() {
@@ -192,5 +315,13 @@ namespace plan9
 
     void RenderWidget::resizeGL(int w, int h) {
         impl_->resizeGL(w, h);
+    }
+
+    void RenderWidget::setFillMode(RenderFillMode mode) {
+        impl_->setFillMode(mode);
+    }
+
+    void RenderWidget::updateImage(std::shared_ptr<QImage> image) {
+        impl_->updateImage(image);
     }
 }
